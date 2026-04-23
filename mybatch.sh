@@ -5,6 +5,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
+#SBATCH --gpus-per-node=nvidia_h100_80gb_hbm3_1g.10gb:1
 #SBATCH --account=def-dspinell
 #SBATCH --time=20:00:00
 #SBATCH --mail-user=pparv056@uottawa.ca
@@ -20,6 +21,7 @@ source /home/payamp/ENV_pack/bin/activate
 # . $CONDA_ROOT/etc/profile.d/conda.sh
 
 export WANDB_SERVICE_WAIT=90
+export JAX_PLATFORMS=cpu
 
 # parameters:
 seeds=(1 2 3)
