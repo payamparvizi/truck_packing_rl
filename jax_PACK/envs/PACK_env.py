@@ -763,11 +763,6 @@ class PACKEnv(gym.Env):
         # next_occ = float(np.sum(next_state))
         # occ_delta = next_occ - prev_occ
         # reward += 0.01 * occ_delta
-        
-        # if terminate:
-        #     reward += 100 * density
-        # else:
-        #     reward += 0
             
         if termination_reason in ["out_of_bounds", "overlap"]:
             reward -= 25.0
@@ -777,8 +772,9 @@ class PACKEnv(gym.Env):
     
         if termination_reason == "completed":
             reward += 20.0
-            
-        # print(density_delta, front_expansion, k_settle)
+        
+        if terminate:
+            reward += 2 * density
     
         return reward, density
     
@@ -1042,7 +1038,7 @@ class PACKEnv(gym.Env):
             "box_dims": self.box_specs[released_idx]["dims"],
             "box_mass": self.box_specs[released_idx]["mass"],
             "termination_reason": termination_reason,
-            "current_density": density,
+            "current_density": k_settle,
             "final_density": density if terminate else 0,
         }
         

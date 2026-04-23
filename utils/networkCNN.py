@@ -15,19 +15,18 @@ class GridCNNEncoder(nn.Module):
         super().__init__()
 
         self.features = nn.Sequential(
-            nn.Conv2d(in_channels, 32, kernel_size=3, stride=1, padding=1),
-            nn.Tanh(),
-            nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1),   # 40 -> 20
-            nn.Tanh(),
-            nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1),  # 20 -> 10
-            nn.Tanh(),
-            nn.Conv2d(128, 128, kernel_size=3, stride=2, padding=1), # 10 -> 5
-            nn.Tanh(),
+            nn.Conv2d(in_channels, 16, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(16, 32, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(),
         )
-
-        conv_out_dim = 128 * (grid_res // 8) * (grid_res // 8)
-        # for grid_res=40, this is 128 * 5 * 5 = 3200
-
+        
+        conv_out_dim = 64 * (grid_res // 8) * (grid_res // 8)
+        
         self.head = nn.Sequential(
             nn.Flatten(),
             nn.Linear(conv_out_dim, hidden_size),

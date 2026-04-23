@@ -16,18 +16,18 @@ def get_args():
     parser.add_argument("--seed", type=int, default=0)
     
     parser.add_argument("--buffer-size", type=int, default=4096)
-    parser.add_argument("--hidden_size_1", type=int, default=512)
-    parser.add_argument("--hidden_size_2", type=int, default=256)
+    parser.add_argument("--hidden_size_1", type=int, default=128)
+    parser.add_argument("--hidden_size_2", type=int, default=64)
     parser.add_argument("--lr", type=float, default=2e-4)
     parser.add_argument("--gamma", type=float, default=0.99)
     
     parser.add_argument("--epoch", type=int, default=300)
-    parser.add_argument("--step-per-epoch", type=int, default=30000)
-    parser.add_argument("--step-per-collect", type=int, default=2048)
+    parser.add_argument("--step-per-epoch", type=int, default=12000)
+    parser.add_argument("--step-per-collect", type=int, default=1024)
     parser.add_argument("--repeat-per-collect", type=int, default=10)
-    parser.add_argument("--batch_size", type=int, default=256)
+    parser.add_argument("--batch_size", type=int, default=64)
     
-    parser.add_argument("--training-num", type=int, default=8)
+    parser.add_argument("--training-num", type=int, default=4)
     parser.add_argument("--test_num", type=int, default=10)
     parser.add_argument("--max_steps_per_episode", type=int, default=120)
     
@@ -49,7 +49,7 @@ def get_args():
     parser.add_argument("--grid_res", type=int, default=40)
     parser.add_argument("--num_boxes", type=int, default=120)
     
-    parser.add_argument("--stack_num", type=int, default=4)
+    parser.add_argument("--stack_num", type=int, default=1)
     
     # Environment specific information
     parser.add_argument("--task", type=str, default='PACK-v0')

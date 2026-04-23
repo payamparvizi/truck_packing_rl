@@ -16,6 +16,7 @@ import pprint
 
 import gymnasium as gym
 from gymnasium.wrappers import FrameStackObservation
+# from gymnasium.wrappers import FrameStack
 
 import torch
 from torch.optim.lr_scheduler import LambdaLR
@@ -30,7 +31,8 @@ from packages.tianshou.data import Collector, ReplayBuffer, VectorReplayBuffer
 from packages.tianshou.utils import WandbLogger
 from packages.tianshou.trainer import OnpolicyTrainer
 
-from utils.network import TripleGridNet
+# from utils.network import TripleGridNet
+from utils.networkCNN import TripleGridNet
 from utils.arguments import get_args
 
 
@@ -180,7 +182,7 @@ def test_env(args: argparse.Namespace = get_args()) -> None:
     
     name=log_name.replace(os.path.sep, "_"),
     config=args,
-    project="results_packaging_v7"
+    project="results_packaging_v10"
     )
     writer = SummaryWriter(log_path)
     writer.add_text("args", str(args))
