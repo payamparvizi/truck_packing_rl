@@ -15,7 +15,7 @@ import numpy as np
 import pprint
 
 import gymnasium as gym
-from gymnasium.wrappers import FrameStack
+from gymnasium.wrappers import FrameStackObservation
 
 import torch
 from torch.optim.lr_scheduler import LambdaLR
@@ -34,7 +34,6 @@ from utils.network import TripleGridNet
 from utils.arguments import get_args
 
 
-
 def env_config(args, seed=0):
     env = gym.make("PACK-v0", 
                    render=False, 
@@ -43,7 +42,7 @@ def env_config(args, seed=0):
                    num_boxes=args.num_boxes)
     
     if args.stack_num > 1:
-        env = FrameStack(env, args.stack_num)
+        env = FrameStackObservation(env, args.stack_num)
     return env
 
 
@@ -181,7 +180,7 @@ def test_env(args: argparse.Namespace = get_args()) -> None:
     
     name=log_name.replace(os.path.sep, "_"),
     config=args,
-    project="results_packaging_v6"
+    project="results_packaging_v7"
     )
     writer = SummaryWriter(log_path)
     writer.add_text("args", str(args))
@@ -202,9 +201,9 @@ def test_env(args: argparse.Namespace = get_args()) -> None:
             episode_per_test=args.test_num,
             batch_size=args.batch_size,
             step_per_collect=args.step_per_collect,
-            # save_best_fn=save_best_fn,
+            save_best_fn=save_best_fn,
             logger=logger,
-            test_in_train=False,
+            test_in_train=True,
         ).run()
         pprint.pprint(result)
 

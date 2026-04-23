@@ -23,7 +23,7 @@ class PACKEnv(gym.Env):
         num_boxes=120,
         release_interval=5.0,
         grid_res=40,
-        settle_steps_max=200,
+        settle_steps_max=1000,
         vel_threshold=3e-3,
         seed = 0,
     ):
@@ -588,6 +588,8 @@ class PACKEnv(gym.Env):
     
             if all_settled:
                 break
+        
+        return k
             
 
     def _release_next_box(self, viewer=None):
@@ -710,10 +712,12 @@ class PACKEnv(gym.Env):
         terminated_early=False,
         terminate=False,
         termination_reason=None,
+        k_settle=10,
     ):
         # ----- current density and max_x -----
         total_volume = 0.0
         max_x = 0.0
+        # print(k_settle)
     
         for i in range(self.current_box):
             dims = self.box_specs[i]["dims"]
@@ -734,41 +738,47 @@ class PACKEnv(gym.Env):
         if not hasattr(self, "prev_max_x"):
             self.prev_max_x = max_x
     
-        density_delta = density - self.prev_density
+        density_delta = (density - self.prev_density)
         front_expansion = max(0.0, max_x - self.prev_max_x)
     
         self.prev_density = density
         self.prev_max_x = max_x
     
         # ----- placement drift -----
-        geom_id = self.box_geom_ids[released_idx]
-        settled_pos = np.array(self.data.geom_xpos[geom_id], dtype=np.float32)
-        assigned_pos = np.array(assigned_pos, dtype=np.float32)
-        position_error = float(np.linalg.norm(settled_pos - assigned_pos))
+        # geom_id = self.box_geom_ids[released_idx]
+        # settled_pos = np.array(self.data.geom_xpos[geom_id], dtype=np.float32)
+        # assigned_pos = np.array(assigned_pos, dtype=np.float32)
+        # position_error = float(np.linalg.norm(settled_pos - assigned_pos))
     
+        #print(density_delta, front_expansion, k_settle)
         # ----- reward -----
         reward = (
-            200.0 * density_delta
-            - 5.0 * front_expansion
-            - 10.0 * position_error
+            100.0 * density_delta
+            - 2.0 * front_expansion
+            - 0.02 * k_settle
         )
-    
-        # optional tiny helper
-        prev_occ = float(np.sum(prev_state))
-        next_occ = float(np.sum(next_state))
-        occ_delta = next_occ - prev_occ
-        reward += 0.01 * occ_delta
         
-        if terminate:
-            reward += 100 * density
-        else:
-            reward += 0
+        # # optional tiny helper
+        # prev_occ = float(np.sum(prev_state))
+        # next_occ = float(np.sum(next_state))
+        # occ_delta = next_occ - prev_occ
+        # reward += 0.01 * occ_delta
+        
+        # if terminate:
+        #     reward += 100 * density
+        # else:
+        #     reward += 0
             
-        if termination_reason in ["out_of_bounds", "overlap", "unstable"]:
+        if termination_reason in ["out_of_bounds", "overlap"]:
             reward -= 25.0
+
+        if termination_reason == "unstable":
+            reward -= 10.0
     
         if termination_reason == "completed":
-            reward += 50.0
+            reward += 20.0
+            
+        # print(density_delta, front_expansion, k_settle)
     
         return reward, density
     
@@ -943,7 +953,7 @@ class PACKEnv(gym.Env):
             unstable_count = int(np.sum(displacements > displacement_threshold))
     
             if unstable_count >= 3:
-                return True, "unstable"
+                return False, "unstable"
     
         if self.current_box >= self.num_boxes:
             return True, "completed"
@@ -997,7 +1007,7 @@ class PACKEnv(gym.Env):
         released_idx = self.current_box
         self.current_box += 1
         
-        self._settle_scene(self.viewer)
+        k_settle = self._settle_scene(self.viewer)
     
         if self.render:
             self._draw_grids()
@@ -1019,7 +1029,9 @@ class PACKEnv(gym.Env):
             assigned_pos=assigned_pos,
             released_idx=released_idx,
             terminated_early=(terminate and termination_reason != "completed"),
-            terminate=terminate
+            terminate=terminate,
+            termination_reason=termination_reason,
+            k_settle=k_settle
         )
         
         info = {
