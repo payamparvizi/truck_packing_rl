@@ -15,8 +15,8 @@ import numpy as np
 import pprint
 
 import gymnasium as gym
-from gymnasium.wrappers import FrameStackObservation
-# from gymnasium.wrappers import FrameStack
+# from gymnasium.wrappers import FrameStackObservation
+from gymnasium.wrappers import FrameStack
 
 import torch
 from torch.optim.lr_scheduler import LambdaLR
@@ -182,7 +182,7 @@ def test_env(args: argparse.Namespace = get_args()) -> None:
     
     name=log_name.replace(os.path.sep, "_"),
     config=args,
-    project="results_packaging_v10"
+    project="results_packaging_v15f"
     )
     writer = SummaryWriter(log_path)
     writer.add_text("args", str(args))

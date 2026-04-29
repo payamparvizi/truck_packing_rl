@@ -18,13 +18,13 @@ def get_args():
     parser.add_argument("--buffer-size", type=int, default=4096)
     parser.add_argument("--hidden_size_1", type=int, default=128)
     parser.add_argument("--hidden_size_2", type=int, default=64)
-    parser.add_argument("--lr", type=float, default=2e-4)
+    parser.add_argument("--lr", type=float, default=3e-3)
     parser.add_argument("--gamma", type=float, default=0.99)
     
     parser.add_argument("--epoch", type=int, default=300)
     parser.add_argument("--step-per-epoch", type=int, default=12000)
     parser.add_argument("--step-per-collect", type=int, default=1024)
-    parser.add_argument("--repeat-per-collect", type=int, default=10)
+    parser.add_argument("--repeat-per-collect", type=int, default=5)
     parser.add_argument("--batch_size", type=int, default=64)
     
     parser.add_argument("--training-num", type=int, default=4)

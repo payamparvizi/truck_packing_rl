@@ -11,7 +11,7 @@
 #SBATCH --mail-user=pparv056@uottawa.ca
 #SBATCH --mail-type=ALL
 #SBATCH --chdir=/scratch/payamp/
-#SBATCH --array=0-80
+#SBATCH --array=0-15
 
 module load StdEnv/2023
 module load python/3.11
@@ -23,11 +23,12 @@ source /home/payamp/ENV_pack/bin/activate
 export WANDB_SERVICE_WAIT=90
 export JAX_PLATFORMS=cpu
 
+
 # parameters:
-seeds=(1 2 3)
-lrs=(1e-4 3e-4 1e-3)
-eps_clips=(0.1 0.2 0.3)
-ent_coefs=(0.0 0.001 0.005)
+seeds=(10 20 30 40)
+lrs=(1e-4 3e-4 1e-3 3e-3)
+eps_clips=(0.2)
+ent_coefs=(0.0)
 
 params=()
 for seed in "${seeds[@]}"; do

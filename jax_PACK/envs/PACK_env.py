@@ -23,7 +23,7 @@ class PACKEnv(gym.Env):
         num_boxes=120,
         release_interval=5.0,
         grid_res=40,
-        settle_steps_max=1000,
+        settle_steps_max=200,
         vel_threshold=3e-3,
         seed = 0,
     ):
@@ -739,43 +739,33 @@ class PACKEnv(gym.Env):
             self.prev_max_x = max_x
     
         density_delta = (density - self.prev_density)
+        compactness = 1.0 - (max_x / 2.0)
         front_expansion = max(0.0, max_x - self.prev_max_x)
     
         self.prev_density = density
         self.prev_max_x = max_x
     
-        # ----- placement drift -----
-        # geom_id = self.box_geom_ids[released_idx]
-        # settled_pos = np.array(self.data.geom_xpos[geom_id], dtype=np.float32)
-        # assigned_pos = np.array(assigned_pos, dtype=np.float32)
-        # position_error = float(np.linalg.norm(settled_pos - assigned_pos))
-    
-        #print(density_delta, front_expansion, k_settle)
+        settle_norm = k_settle / self.settle_steps_max
         # ----- reward -----
         reward = (
-            100.0 * density_delta
-            - 2.0 * front_expansion
-            - 0.02 * k_settle
+            100.0 * density_delta * compactness
+            - 3.0 * max_x
+            - 5.0 * front_expansion
+            - 2.0 * settle_norm
         )
         
-        # # optional tiny helper
-        # prev_occ = float(np.sum(prev_state))
-        # next_occ = float(np.sum(next_state))
-        # occ_delta = next_occ - prev_occ
-        # reward += 0.01 * occ_delta
-            
-        if termination_reason in ["out_of_bounds", "overlap"]:
-            reward -= 25.0
-
-        if termination_reason == "unstable":
-            reward -= 10.0
-    
-        if termination_reason == "completed":
-            reward += 20.0
+        if self.current_box < 70:
+            reward += 10.0 * (1.0 - self.current_box / 70.0)
         
-        if terminate:
-            reward += 2 * density
-    
+        if termination_reason in ["out_of_bounds", "overlap"]:
+            reward -= 10.0 * (1.0 - density)
+        
+        if termination_reason == "unstable":
+            reward -= 10.0 * (1.0 - density)
+        
+        if density >= 0.71:
+            reward += 100.0
+            
         return reward, density
     
 
@@ -1030,6 +1020,10 @@ class PACKEnv(gym.Env):
             k_settle=k_settle
         )
         
+        if density >= 0.71:
+            terminate = True
+            termination_reason = "density_reached"        
+
         info = {
             "valid_action": True,
             "released_box": released_idx,
@@ -1038,15 +1032,12 @@ class PACKEnv(gym.Env):
             "box_dims": self.box_specs[released_idx]["dims"],
             "box_mass": self.box_specs[released_idx]["mass"],
             "termination_reason": termination_reason,
-            "current_density": k_settle,
+            "current_density": self.current_box,
             "final_density": density if terminate else 0,
         }
         
         if self.viewer is not None:
             self.viewer.sync()
-        
-        # if terminate == True:
-        #     print(density)
         
         return next_state, reward, terminate, truncate, info
 
